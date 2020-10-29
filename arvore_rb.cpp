@@ -39,10 +39,10 @@ void Tree::insere(int x)
 			tmp = tmp->right;
 		}
 	}
-	tmp = criar_no(x, T_NIL);       // Crio um novo nó e o aloco em tmp.
-	tmp->p = y;				        // O pai do nó inserido será y.
+	tmp = criar_no(x, T_NIL); // Crio um novo nó e o aloco em tmp.
+	tmp->p = y;				  // O pai do nó inserido será y.
 	if (tmp->value < y->value)
-		y->left = tmp;              // Se tmp for menor que y, então ele é filho da direita
+		y->left = tmp; // Se tmp for menor que y, então ele é filho da direita
 	else
 		y->right = tmp;				// Se não, é filho da esquerda
 	tmp->right = tmp->left = T_NIL; // Os filhos de tmp serão a sentinela.
@@ -64,8 +64,8 @@ void Tree::transplant(node *u, node *v)
 void Tree::deletar(node *z)
 {								   // Função que deleta um nó passado por parametro.
 	node *y = z, *x;			   // Declaro algumas variaveis.
-	int yOriginalColor = y->color; // Guardo a cor original da RB, será importante 
-	if (z->left == T_NIL)          // para manter suas propriedades.
+	int yOriginalColor = y->color; // Guardo a cor original da RB, será importante
+	if (z->left == T_NIL)		   // para manter suas propriedades.
 	{							   // Se z não tem filho da esquerda.
 		x = z->right;			   // X vira o filho da direita.
 		transplant(z, z->right);   // Substituo z pelo filho da direita.
@@ -77,7 +77,7 @@ void Tree::deletar(node *z)
 	}
 	else
 	{							   // Se z tem os dois filhos.
-		y = minimum(y->right);	   // Encontro o menor filho da subárvore esquerda.
+		y = minimum(z->right);	   // Encontro o menor filho da subárvore esquerda.
 		yOriginalColor = y->color; // A cor de y será igual a cor do seu menor filho da esquerda.
 		x = y->right;			   // x vira o filho da direita do menor elemento da subárvore esquerda.
 		if (y->p == z)
@@ -93,6 +93,7 @@ void Tree::deletar(node *z)
 		y->left->p = y;		 // O pai do filho da esquerda de y vira y.
 		y->color = z->color; // A cor de y vira a cor de z, que foi transplantado pra y
 	}
+	//delete z;
 	if (yOriginalColor == BLACK)
 		deleteFix_RB(x); // Se a cor original de y for preta, violamos a RB, então consertamos.
 }
@@ -193,7 +194,7 @@ void Tree::insertFix_RB(node *x)
 				*/
 				rotacionar_direita(x->p->p); // Rotaciono pra direita
 											 // Nesse momento, x ainda é vermelho.
-				/*
+											 /*
 				* Então temos  R
 				*            B   B
 				*           R R R R
@@ -226,45 +227,63 @@ void Tree::insertFix_RB(node *x)
 	this->root->color = BLACK;
 }
 
+// Consertar a árvore após a remoção
 void Tree::deleteFix_RB(node *x)
 {
-	node *w;
+	node *w; //nó temporário que representa o irmão de x.
+
 	while (x != this->root && x->color == BLACK)
 	{
 		if (x == x->p->left)
-		{
-			w = x->p->right;
+		{					 // se x fica a esquerda,
+			w = x->p->right; // w é seu irmão que fica a direita do pai de x.
+
+			// Caso I : se o irmão do nó x é vermelho
+
 			if (w->color == RED)
 			{
-				w->color = BLACK;
-				x->p->color = RED;
-				rotacionar_esquerda(x->p);
-				w = x->p->right;
+				w->color = BLACK;		   // Muda a cor de w para preto.
+				x->p->color = RED;		   // Troca a cor do pai de x para vermelho.
+				rotacionar_esquerda(x->p); // Rotaciona para a esquerda o pai do x.
+				w = x->p->right;		   // w recebe o novo filho à direita do pai de x.
 			}
+
+			// Caso II : se ambos os filhos de w são pretos.
+
 			if (w->left->color == BLACK && w->right->color == BLACK)
 			{
-				w->color = RED;
-				x = x->p;
+				w->color = RED; // w recebe a cor vermelha.
+				x = x->p;		// x recebe o seu pai.
 			}
+
 			else
 			{
+
+				// Caso III : Se somente o filho à direita de w é preto.
+
 				if (w->right->color == BLACK)
 				{
-					w->left->color = BLACK;
-					w->color = RED;
-					rotacionar_direita(w);
-					w = x->p->right;
+					w->left->color = BLACK; // Troca a cor do filho à esquerda de w para preto.
+					w->color = RED;			// Muda a cor de w para vermelho.
+					rotacionar_direita(w);	// Rotaciona w à direita.
+					w = x->p->right;		// w recebe o novo filho à direita do pai de x.
 				}
-				w->color = x->p->color;
-				x->p->color = BLACK;
-				w->right->color = BLACK;
-				rotacionar_esquerda(x->p);
-				x = this->root;
+
+				// Caso IV : caso nenhum dos casos acima ocorra utilizamos as regras a seguir:
+
+				w->color = x->p->color;	   // troca a cor de w para a cor do pai de x.
+				x->p->color = BLACK;	   // e o pai de x recebe a cor preta.
+				w->right->color = BLACK;   // a cor do filho à direita de w passa a ser preta.
+				rotacionar_esquerda(x->p); // rotaciona a esquerda o pai de x.
+				x = this->root;			   // x recebe a raiz da árvore.
 			}
 		}
+
+		//Próximas linhas fazem as mesmas coisas da acima porém mudando de direita para esquerda e vice-versa.
+
 		else
-		{
-			w = x->p->left;
+		{					//se x fica a direita,
+			w = x->p->left; // w é o filho à esquerda do pai de x
 			if (w->color == RED)
 			{
 				w->color = BLACK;
@@ -294,6 +313,7 @@ void Tree::deleteFix_RB(node *x)
 			}
 		}
 	}
+
 	x->color = BLACK;
 }
 
