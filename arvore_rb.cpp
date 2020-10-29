@@ -251,7 +251,7 @@ void Tree::deleteFix_RB(node *x)
 				if (w->right->color == BLACK)
 				{
 					w->left->color = BLACK;
-					w->left->color = RED;
+					w->color = RED;
 					rotacionar_direita(w);
 					w = x->p->right;
 				}
@@ -282,7 +282,7 @@ void Tree::deleteFix_RB(node *x)
 				if (w->left->color == BLACK)
 				{
 					w->right->color = BLACK;
-					w->right->color = RED;
+					w->color = RED;
 					rotacionar_esquerda(w);
 					w = x->p->left;
 				}
